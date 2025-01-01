@@ -1,4 +1,8 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { HttpClientService } from '../../http-client/services/http-client.service';
 import { RegisterDto, LoginDto, LoginResponseDto } from '../dto/auth.dto';
@@ -45,6 +49,13 @@ export class AuthService {
   // 로그아웃
   async logout(token: string): Promise<void> {
     try {
+      // 먼저 토큰 검증
+      const isValid = await this.validateToken(token);
+      if (!isValid) {
+        throw new UnauthorizedException('유효하지 않은 토큰입니다');
+      }
+
+      // User Service 로그아웃
       await this.httpClient.post(
         `${this.userServiceUrl}/api/users/logout`,
         {},
@@ -55,18 +66,26 @@ export class AuthService {
         },
       );
     } catch (error) {
-      throw error;
+      if (error instanceof UnauthorizedException) {
+        throw error;
+      }
+      throw new InternalServerErrorException(
+        '로그아웃 처리 중 오류가 발생했습니다',
+      );
     }
   }
 
   // 토큰 검증 (여전히 Auth Service 사용)
   async validateToken(token: string): Promise<boolean> {
     try {
-      await this.httpClient.get(`${this.authServiceUrl}/api/auth/validate`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
+      await this.httpClient.get(
+        `${this.authServiceUrl}/api/auth/token/validate`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         },
-      });
+      );
       return true;
     } catch (error) {
       return false;

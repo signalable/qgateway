@@ -5,6 +5,7 @@ import {
   HttpCode,
   HttpStatus,
   Headers,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
 import { AuthService } from '../services/auth.service';
@@ -32,10 +33,22 @@ export class AuthController {
   @Post('logout')
   @HttpCode(HttpStatus.OK)
   async logout(@Headers('authorization') auth: string): Promise<void> {
-    const token = auth?.split(' ')[1];
-    if (!token) {
-      return;
+    // Authorization 헤더가 없는 경우 처리
+    if (!auth) {
+      throw new UnauthorizedException('Authorization 헤더가 필요합니다');
     }
-    await this.authService.logout(token);
+
+    // Bearer 토큰 형식 검증 및 파싱
+    const [type, token] = auth.split(' ');
+    if (type !== 'Bearer' || !token) {
+      throw new UnauthorizedException('잘못된 Authorization 형식입니다');
+    }
+
+    try {
+      await this.authService.logout(token);
+    } catch (error) {
+      // HttpClientService에서 이미 에러를 적절히 변환하므로 그대로 throw
+      throw error;
+    }
   }
 }
