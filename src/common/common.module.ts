@@ -3,6 +3,7 @@ import { APP_FILTER, APP_INTERCEPTOR, APP_GUARD } from '@nestjs/core';
 import { HttpExceptionFilter } from './filters/http-exception.filter';
 import { LoggingInterceptor } from './interceptors/logging.interceptor';
 import { CustomThrottlerGuard } from './guards/throttler.guard';
+import { ThrottlerModule } from './throttler/throttler.module';
 
 @Global()
 @Module({
@@ -20,5 +21,6 @@ import { CustomThrottlerGuard } from './guards/throttler.guard';
       useClass: CustomThrottlerGuard,
     },
   ],
+  imports: [ThrottlerModule],
 })
 export class CommonModule {}
