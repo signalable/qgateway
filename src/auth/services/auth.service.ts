@@ -6,19 +6,21 @@ import { RegisterDto, LoginDto, LoginResponseDto } from '../dto/auth.dto';
 @Injectable()
 export class AuthService {
   private readonly authServiceUrl: string;
+  private readonly userServiceUrl: string;
 
   constructor(
     private readonly httpClient: HttpClientService,
     private readonly configService: ConfigService,
   ) {
     this.authServiceUrl = this.configService.get<string>('authService.url');
+    this.userServiceUrl = this.configService.get<string>('userService.url');
   }
 
   // 회원가입
   async register(registerDto: RegisterDto): Promise<void> {
     try {
       await this.httpClient.post(
-        `${this.authServiceUrl}/api/auth/register`,
+        `${this.userServiceUrl}/api/users/register`,
         registerDto,
       );
     } catch (error) {
@@ -31,7 +33,7 @@ export class AuthService {
   async login(loginDto: LoginDto): Promise<LoginResponseDto> {
     try {
       const response = await this.httpClient.post<LoginResponseDto>(
-        `${this.authServiceUrl}/api/auth/login`,
+        `${this.userServiceUrl}/api/users/login`,
         loginDto,
       );
       return response.data;
@@ -44,7 +46,7 @@ export class AuthService {
   async logout(token: string): Promise<void> {
     try {
       await this.httpClient.post(
-        `${this.authServiceUrl}/api/auth/logout`,
+        `${this.userServiceUrl}/api/users/logout`,
         {},
         {
           headers: {
@@ -57,7 +59,7 @@ export class AuthService {
     }
   }
 
-  // 토큰 검증
+  // 토큰 검증 (여전히 Auth Service 사용)
   async validateToken(token: string): Promise<boolean> {
     try {
       await this.httpClient.get(`${this.authServiceUrl}/api/auth/validate`, {

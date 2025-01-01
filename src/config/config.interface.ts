@@ -8,6 +8,11 @@ export interface AuthServiceConfig {
   timeout: number;
 }
 
+export interface UserServiceConfig {
+  url: string;
+  timeout: number;
+}
+
 export interface ThrottleConfig {
   ttl: number;
   limit: number;

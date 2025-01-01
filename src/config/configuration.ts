@@ -11,6 +11,12 @@ export default () => ({
     timeout: parseInt(process.env.AUTH_SERVICE_TIMEOUT, 10) || 5000,
   },
 
+  // User 서비스 설정
+  userService: {
+    url: process.env.USER_SERVICE_URL || 'http://localhost:8081',
+    timeout: parseInt(process.env.USER_SERVICE_TIMEOUT, 10) || 5000,
+  },
+
   // Rate Limiting 설정
   throttle: {
     ttl: parseInt(process.env.THROTTLE_TTL, 10) || 60,
