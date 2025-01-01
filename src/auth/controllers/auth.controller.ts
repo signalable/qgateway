@@ -6,6 +6,7 @@ import {
   HttpStatus,
   Headers,
 } from '@nestjs/common';
+import { Throttle } from '@nestjs/throttler';
 import { AuthService } from '../services/auth.service';
 import { RegisterDto, LoginDto, LoginResponseDto } from '../dto/auth.dto';
 
@@ -13,12 +14,15 @@ import { RegisterDto, LoginDto, LoginResponseDto } from '../dto/auth.dto';
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
+  // 회원가입은 더 엄격한 제한 적용
+  @Throttle({ default: { limit: 3, ttl: 1000 } }) // 1분당 3회로 제한
   @Post('register')
   @HttpCode(HttpStatus.CREATED)
   async register(@Body() registerDto: RegisterDto): Promise<void> {
     await this.authService.register(registerDto);
   }
 
+  // 로그인은 기본 제한 적용
   @Post('login')
   @HttpCode(HttpStatus.OK)
   async login(@Body() loginDto: LoginDto): Promise<LoginResponseDto> {
